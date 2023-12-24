@@ -6,6 +6,7 @@ import com.example.wclchat.databinding.ActivityMainBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.example.wclchat.utils.openFragment
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -16,28 +17,18 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setSupportActionBar(binding.toolbar)
-
         auth = Firebase.auth
 
-        // Настройка BottomNavigationView
-        binding.bottomNavigation.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_chat -> {
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragment_container, ChatFragment())
-                        .commit()
-                    true
-                }
-                // Обработка других элементов меню
-                // ...
-                else -> false
-            }
-        }
+        onBottomNavClicks()
+        openFragment(ChatFragment())
+    }
 
-        // Установка начального фрагмента
-        if (savedInstanceState == null) {
-            binding.bottomNavigation.selectedItemId = R.id.nav_chat
+    private fun onBottomNavClicks() {
+        binding.bottomNavigation.setOnItemSelectedListener {
+            when(it.itemId) {
+                R.id.nav_chat -> openFragment(ChatFragment())
+            }
+            true
         }
     }
 }

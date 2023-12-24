@@ -4,13 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000">
+    android:background="?attr/colorOnPrimary">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/chatsRecyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="#393939"
+        android:background="?attr/colorOnPrimary"
         app:layout_constraintBottom_toTopOf="@+id/sendLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -63,7 +63,7 @@
         android:clickable="true"
         android:focusable="true"
         android:src="@drawable/ic_arrow_downward"
-        app:backgroundTint="@color/colorAccent"
+        app:backgroundTint="?attr/colorOnPrimary"
         app:layout_constraintBottom_toTopOf="@+id/sendLayout"
         app:layout_constraintEnd_toEndOf="parent" />
 

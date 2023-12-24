@@ -20,8 +20,8 @@ class UserAdapter(private val currentUserId: String) : ListAdapter<User, UserAda
             userName.text = user.name
 
             // Изменение цвета текста сообщений и имени пользователя
-            message.setTextColor(ContextCompat.getColor(binding.root.context, R.color.textAccent))
-            userName.setTextColor(ContextCompat.getColor(binding.root.context, R.color.colorPrimaryDark))
+//            message.setTextColor(ContextCompat.getColor(binding.root.context, R.color.textAccent))
+//            userName.setTextColor(ContextCompat.getColor(binding.root.context, R.color.colorPrimaryDark))
         }
         companion object {
             fun create (parent: ViewGroup) : ItemHolder {

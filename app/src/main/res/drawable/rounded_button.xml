@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#F3DE8A" /> <!-- Цвет фона кнопки -->
+    <solid android:color="@color/md_theme_light_primary" /> <!-- Цвет фона кнопки -->
     <corners android:radius="20dp" /> <!-- Радиус закругления углов -->
 </shape>
