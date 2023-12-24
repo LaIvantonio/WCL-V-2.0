@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">WCLChat</string>
+    <string name="title_activity_sign_in">SignInAct</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="home">Home</string>
+    <string name="tracks">Tracks</string>
+    <string name="settings">Settings</string>
+    <string name="location">Location</string>
+    <string name="update_time">Update time</string>
+    <string name="update_time_summary">Location update time</string>
+    <string name="track_color">Track color</string>
+    <string name="track_color_summary">Choose Track color</string>
+    <string name="location_disabled">Location disabled</string>
+    <string name="location_dialog_message">Do you want to enable GPS?</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="send">отправить</string>
+</resources>

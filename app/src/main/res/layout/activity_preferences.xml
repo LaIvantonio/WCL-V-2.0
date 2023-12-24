@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- CheckBox для памятников -->
+        <CheckBox
+            android:id="@+id/checkboxMonuments"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Памятники" />
+
+        <!-- CheckBox для музеев -->
+        <CheckBox
+            android:id="@+id/checkboxMuseums"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Музеи" />
+
+        <!-- CheckBox для парков -->
+        <CheckBox
+            android:id="@+id/checkboxParks"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Парки" />
+
+        <!-- CheckBox для театров -->
+        <CheckBox
+            android:id="@+id/checkboxTheaters"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Театры" />
+
+        <!-- Добавь другие CheckBox по желанию -->
+
+        <!-- Кнопка для сохранения предпочтений -->
+        <Button
+            android:id="@+id/btnSavePreferences"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Сохранить предпочтения" />
+
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "602166567939",
+    "firebase_url": "https://mychat-30892-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "mychat-30892",
+    "storage_bucket": "mychat-30892.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:602166567939:android:59dd23e055f9fd972a9a36",
+        "android_client_info": {
+          "package_name": "com.example.wclchat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "602166567939-6or2dpjotgb3qnhpglvjcupkpa6q2oj1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.wclchat",
+            "certificate_hash": "47a6e85d782e064f5f8b6cb5bf4ee0daa1d9de1c"
+          }
+        },
+        {
+          "client_id": "602166567939-2tclke857j4gigqjhoff4rs9pl743rie.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZUaJZujocJOZq7K9rBygEdhbbvbt0bik"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "602166567939-2tclke857j4gigqjhoff4rs9pl743rie.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
