@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
@@ -13,7 +13,7 @@
         android:layout_marginEnd="5dp"
         android:layout_marginBottom="10dp"
         android:background="#F6F0F0"
-        android:backgroundTint="@color/md_theme_light_primaryContainer"
+        android:backgroundTint="?attr/colorOnError"
         app:cardCornerRadius="35dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -43,5 +43,5 @@
                 android:textSize="12sp" />
 
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 </androidx.constraintlayout.widget.ConstraintLayout>
