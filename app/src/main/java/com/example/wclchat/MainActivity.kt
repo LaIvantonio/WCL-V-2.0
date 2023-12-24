@@ -27,6 +27,8 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNavigation.setOnItemSelectedListener {
             when(it.itemId) {
                 R.id.nav_chat -> openFragment(ChatFragment())
+                R.id.nav_profile -> openFragment(ProfileFragment())
+                R.id.nav_settings -> openFragment(SettingsFragment())
             }
             true
         }

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="General Settings">
+
+        <ListPreference
+            android:key="theme_preference"
+            android:title="App Theme"
+            android:summary="Choose your preferred app theme"
+            android:defaultValue="light"
+            android:entries="@array/theme_options"
+            android:entryValues="@array/theme_values" />
+
+        <!-- Другие настройки... -->
+
+    </PreferenceCategory>
+
+    <!-- Добавьте другие категории и настройки, если необходимо -->
+
+</PreferenceScreen>

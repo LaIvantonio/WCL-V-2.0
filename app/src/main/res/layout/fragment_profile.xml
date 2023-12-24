@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="viewModel"
+            type="com.example.wclchat.ProfileViewModel" />
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+        <TextView
+            android:id="@+id/userNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:text="@{viewModel.userName}"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/achievementsTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/userNameTextView"
+            android:layout_marginTop="16dp"
+            android:text="@{`Достижения: ` + viewModel.achievements}"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/completedKilometersTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/achievementsTextView"
+            android:layout_marginTop="8dp"
+            android:text="@{`Пройдено км: ` + viewModel.completedKilometers}"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/levelTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/completedKilometersTextView"
+            android:layout_marginTop="8dp"
+            android:text="@{`Уровень: ` + viewModel.level}"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/ratingTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/levelTextView"
+            android:layout_marginTop="8dp"
+            android:text="@{`Рейтинг: ` + viewModel.rating}"
+            android:textSize="16sp" />
+
+    </RelativeLayout>
+</layout>
