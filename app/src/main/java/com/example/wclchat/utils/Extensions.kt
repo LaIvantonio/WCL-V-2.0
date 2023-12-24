@@ -4,8 +4,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.wclchat.R
 
-
-
 fun Fragment.openFragment(f: Fragment) {
     (activity as AppCompatActivity).supportFragmentManager
         .beginTransaction().setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)

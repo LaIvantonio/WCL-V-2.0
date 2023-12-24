@@ -24,11 +24,27 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onBottomNavClicks() {
-        binding.bottomNavigation.setOnItemSelectedListener {
-            when(it.itemId) {
-                R.id.nav_chat -> openFragment(ChatFragment())
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_chat -> {
+                    openFragment(ChatFragment())
+                    true
+                }
+                R.id.nav_profile -> {
+                    openFragment(ProfileFragment())
+                true
+                }
+                R.id.nav_settings -> {
+                    openFragment(SettingsFragment())
+                    true
+                }
+                R.id.nav_quests -> {
+                    openFragment(QuestsFragment())
+                    true
+                }
+                // Добавьте обработку других пунктов меню здесь, если они есть
+                else -> false
             }
-            true
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.example.wclchat
 
-import PreferencesActivity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -67,6 +66,7 @@ class SignInAct : ComponentActivity() {
             if(it.isSuccessful) {
                 Log.d("MyLog", "Google signIn done")
                 checkAuthState()
+                checkUserPreferences() // Проверяем предпочтения пользователя
             } else {
                 Log.d("MyLog", "Google signIn error")
             }
@@ -82,30 +82,33 @@ class SignInAct : ComponentActivity() {
 
     private fun checkUserPreferences() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid
+        Log.d("SignInAct", "Checking user preferences for user ID: $userId")
         if (userId != null) {
             val databaseReference = Firebase.database.getReference("usersPreferences")
             databaseReference.child(userId).addListenerForSingleValueEvent(object :
                 ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (!snapshot.exists()) {
-                        // Пользователь новый, нет предпочтений, перенаправляем на экран предпочтений
+                        Log.d("SignInAct", "User preferences not found, opening PreferencesActivity")
                         openPreferencesScreen()
                     } else {
-                        // Пользователь существует, предпочтения найдены, перенаправляем на главный экран
+                        Log.d("SignInAct", "User preferences found, opening MainActivity")
                         openMainScreen()
                     }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    // Обработка ошибок, например, показать сообщение
+                    Log.d("SignInAct", "Database error: ${error.message}")
                 }
             })
+        } else {
+            Log.d("SignInAct", "User ID is null, cannot check preferences")
         }
-
     }
     private fun openPreferencesScreen() {
         val intent = Intent(this, PreferencesActivity::class.java)
         startActivity(intent)
+        finish() // закрыть текущую активность после перехода
     }
 
 
