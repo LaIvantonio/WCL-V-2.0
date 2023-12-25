@@ -187,7 +187,11 @@ class QuestsFragment : Fragment() {
         }
 
     private fun openQuestDetails(quest: Quest) {
-        // Здесь будет код для открытия QuestDetailsFragment с деталями квеста
+        val fragment = QuestDetailsFragment.newInstance(quest)
+        requireActivity().supportFragmentManager.beginTransaction()
+            .replace(R.id.placeHolder, fragment)
+            .addToBackStack(null) // Добавляем транзакцию в back stack, чтобы пользователь мог вернуться назад
+            .commit()
     }
 
     override fun onDestroyView() {
