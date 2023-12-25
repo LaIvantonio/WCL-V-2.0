@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -40,9 +41,16 @@ class QuestsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.rvQuests.layoutManager = LinearLayoutManager(context)
+        // Инициализируем адаптер с лямбда-функцией для обработки клика по квесту
+        val adapter = QuestAdapter { quest ->
+            // Обработка клика по квесту
+            openQuestDetails(quest)
+        }
+        binding.rvQuests.adapter = adapter
         loadUserPreferences()
         checkLocationPermission()
     }
+
 
     private fun requestPlaces(location: Location) {
         CoroutineScope(Dispatchers.IO).launch {
@@ -53,6 +61,8 @@ class QuestsFragment : Fragment() {
                 val response = client.newCall(request).execute()
 
                 val responseBody = response.body?.string()
+
+                Log.d("QuestsFragment", "Response: $responseBody")
                 if (response.isSuccessful && responseBody != null) {
                     val placesType = object : TypeToken<List<Place>>() {}.type
                     val places: List<Place> = Gson().fromJson(responseBody, placesType)
@@ -65,15 +75,12 @@ class QuestsFragment : Fragment() {
                     // Обработка ошибок запроса
                 }
             } catch (e: Exception) {
+                Log.e("QuestsFragment", "Error requesting places", e)
                 // Обработка ошибок запроса
             }
         }
     }
-    // Функция для генерации квестов на основе найденных мест
-    private fun generateQuestsBasedOnPlaces(places: List<Place>) {
-        // Преобразование списка мест в список квестов
-        // ...
-    }
+
     // Класс для представления места, полученного от Nominatim API
     data class Place(
         val lat: Double,
@@ -81,6 +88,7 @@ class QuestsFragment : Fragment() {
         val display_name: String
         // Добавьте другие поля, если они вам нужны
     )
+
     private fun loadUserPreferences() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid
         if (userId != null) {
@@ -90,33 +98,63 @@ class QuestsFragment : Fragment() {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val preferences = snapshot.getValue(Preferences::class.java)
                     if (preferences != null) {
+                        Log.d("QuestsFragment", "User preferences loaded: $preferences")
                         generateQuestsBasedOnPreferences(preferences)
+                    } else {
+                        Log.d("QuestsFragment", "User preferences are null")
                     }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    // Обработка ошибок, например, показать сообщение
+                    Log.d("QuestsFragment", "Database error: ${error.message}")
                 }
             })
+        } else {
+            Log.d("QuestsFragment", "User ID is null")
         }
     }
 
     private fun generateQuestsBasedOnPreferences(preferences: Preferences) {
-        // Здесь будет ваша логика для генерации списка квестов
         val quests = mutableListOf<Quest>()
-        // Заполните список quests на основе предпочтений пользователя
+        // Примерная логика генерации квестов
+        if (preferences.monuments) {
+            quests.add(Quest(id = "1", title = "Посетить памятник 'Мать Родина'", description = "Описание квеста...", location = "47.222078,39.720349"))
+        }
+        if (preferences.museums) {
+            quests.add(Quest(id = "2", title = "Посетить Ростовский музей изобразительных искусств", description = "Описание квеста...", location = "47.231349,39.723097"))
+        }
+        if (preferences.parks) {
+            quests.add(Quest(id = "3", title = "Прогулка в парке Горького", description = "Описание квеста...", location = "47.222831,39.716775"))
+        }
+        if (preferences.theaters) {
+            quests.add(Quest(id = "4", title = "Посетить Ростовский академический театр драмы", description = "Описание квеста...", location = "47.234383,39.712020"))
+        }
+        // Добавьте больше квестов в зависимости от предпочтений пользователя
 
-        // Обновление RecyclerView с новым списком квестов
+        Log.d("QuestsFragment", "Generated quests based on preferences: $quests")
         updateQuestsRecyclerView(quests)
     }
 
-    private fun updateQuestsRecyclerView(quests: List<Quest>) {
-        val adapter = QuestAdapter(quests) { quest ->
-            // Обработка клика по квесту, например, открытие QuestDetailsFragment
-            openQuestDetails(quest)
+    // Функция для генерации квестов на основе найденных мест
+    private fun generateQuestsBasedOnPlaces(places: List<Place>) {
+        val quests = places.mapIndexed { index, place ->
+            Quest(
+                id = "quest_${index + 1}",
+                title = "Квест: ${place.display_name}",
+                description = "Исследуйте это место: ${place.display_name}",
+                location = "${place.lat},${place.lon}"
+            )
         }
-        binding.rvQuests.adapter = adapter
+        Log.d("QuestsFragment", "Generated quests based on places: $quests")
+        updateQuestsRecyclerView(quests)
     }
+
+        private fun updateQuestsRecyclerView(quests: List<Quest>) {
+            // Получаем адаптер из RecyclerView и приводим его к типу QuestAdapter
+            Log.d("QuestsFragment", "Updating quests RecyclerView with quests: $quests")
+            val adapter = binding.rvQuests.adapter as? QuestAdapter
+            adapter?.submitList(quests)
+        }
 
     private fun openQuestDetails(quest: Quest) {
         // Здесь будет код для открытия QuestDetailsFragment с деталями квеста
