@@ -98,7 +98,6 @@ class QuestDetailsFragment : Fragment() {
 
                                 if (response.isSuccessful) {
                                         val responseBody = response.body?.string()
-                                        Log.d("QuestDetailsFragment", "Response from routing service: $responseBody")
                                         if (responseBody != null) {
                                                 val routePoints = parseRoute(responseBody)
                                                 withContext(Dispatchers.Main) {
@@ -108,6 +107,7 @@ class QuestDetailsFragment : Fragment() {
                                 } else {
                                         Log.e("QuestDetailsFragment", "Request to routing service API failed: ${response.code}")
                                 }
+
                         } catch (e: Exception) {
                                 // Обработка исключения
                         }
@@ -116,9 +116,9 @@ class QuestDetailsFragment : Fragment() {
 
         private fun parseRoute(responseBody: String): List<GeoPoint> {
                 val json = JSONObject(responseBody)
-                val routes = json.getJSONArray("routes")
-                val route = routes.getJSONObject(0)
-                val geometry = route.getJSONObject("geometry")
+                val features = json.getJSONArray("features")
+                val feature = features.getJSONObject(0)
+                val geometry = feature.getJSONObject("geometry")
                 val coordinates = geometry.getJSONArray("coordinates")
 
                 val routePoints = mutableListOf<GeoPoint>()
@@ -131,7 +131,9 @@ class QuestDetailsFragment : Fragment() {
                 return routePoints
         }
 
+
         private fun drawRouteOnMap(routePoints: List<GeoPoint>) {
+                Log.d("QuestDetailsFragment", "Drawing route with ${routePoints.size} points")
                 val polyline = Polyline().apply {
                         setPoints(routePoints)
                         color = Color.BLUE
