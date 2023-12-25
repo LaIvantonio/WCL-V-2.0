@@ -49,8 +49,10 @@ class QuestsFragment : Fragment() {
         binding.rvQuests.layoutManager = LinearLayoutManager(context)
         // Инициализируем адаптер с лямбда-функцией для обработки клика по квесту
         val adapter = QuestAdapter { quest ->
-            // Обработка клика по квесту
-            openQuestDetails(quest)
+            // Получите текущее местоположение пользователя
+            getLocation { location ->
+                openQuestDetails(quest, location)
+            }
         }
         binding.rvQuests.adapter = adapter
         loadUserPreferences()
@@ -186,11 +188,11 @@ class QuestsFragment : Fragment() {
             adapter?.submitList(quests)
         }
 
-    private fun openQuestDetails(quest: Quest) {
-        val fragment = QuestDetailsFragment.newInstance(quest)
+    private fun openQuestDetails(quest: Quest, currentLocation: Location) {
+        val fragment = QuestDetailsFragment.newInstance(quest, currentLocation)
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.placeHolder, fragment)
-            .addToBackStack(null) // Добавляем транзакцию в back stack, чтобы пользователь мог вернуться назад
+            .addToBackStack(null)
             .commit()
     }
 

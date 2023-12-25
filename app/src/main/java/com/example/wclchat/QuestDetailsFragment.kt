@@ -1,7 +1,9 @@
 package com.example.wclchat
 
 import android.graphics.Color
+import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +19,7 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Polyline
+import org.osmdroid.views.overlay.Marker
 
 class QuestDetailsFragment : Fragment() {
         private var _binding: FragmentQuestDetailsBinding? = null
@@ -25,10 +28,12 @@ class QuestDetailsFragment : Fragment() {
 
         companion object {
                 private const val ARG_QUEST = "quest"
+                private const val ARG_CURRENT_LOCATION = "current_location"
 
-                fun newInstance(quest: Quest): QuestDetailsFragment {
+                fun newInstance(quest: Quest, currentLocation: Location): QuestDetailsFragment {
                         val args = Bundle().apply {
                                 putSerializable(ARG_QUEST, quest)
+                                putParcelable(ARG_CURRENT_LOCATION, currentLocation)
                         }
                         return QuestDetailsFragment().apply {
                                 arguments = args
@@ -47,14 +52,17 @@ class QuestDetailsFragment : Fragment() {
         override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
                 super.onViewCreated(view, savedInstanceState)
                 val quest = arguments?.getSerializable(ARG_QUEST) as? Quest
+                val currentLocation = arguments?.getParcelable<Location>(ARG_CURRENT_LOCATION)
                 quest?.let {
                         binding.tvQuestDetailsTitle.text = it.title
                         binding.tvQuestDescription.text = it.description
-                        initializeMap(it.location)
+                        if (currentLocation != null) {
+                                initializeMap(it.location, currentLocation)
+                        }
                 }
         }
 
-        private fun initializeMap(location: String) {
+        private fun initializeMap(questLocationString: String, currentLocation: Location) {
                 val ctx = requireContext()
                 Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx))
                 map = binding.map.apply {
@@ -63,22 +71,24 @@ class QuestDetailsFragment : Fragment() {
                         setMultiTouchControls(true)
                 }
 
-                val questLocation = location.split(",").let { GeoPoint(it[0].toDouble(), it[1].toDouble()) }
+                val questLocation = questLocationString.split(",").let { GeoPoint(it[0].toDouble(), it[1].toDouble()) }
+                addMarkerAtLocation(questLocation) // Добавляем маркер на карту
                 val mapController = map.controller
                 mapController.setZoom(15.0)
                 mapController.setCenter(questLocation)
-
-                // Здесь будет код для добавления маркера на карту
-                // ...
-
                 // Запрос маршрута
-                requestRoute(questLocation)
+                val startPoint = GeoPoint(currentLocation.latitude, currentLocation.longitude)
+                requestRoute(questLocation, startPoint)
+
         }
 
-        private fun requestRoute(destination: GeoPoint) {
-                // Замените на ваш URL и API ключ
-                val url = "URL_ДЛЯ_ЗАПРОСА_МАРШРУТА"
-                val apiKey = "ВАШ_API_КЛЮЧ"
+        // Используйте currentLocation для запроса маршрута:
+        private fun requestRoute(destination: GeoPoint, startPoint: GeoPoint) {
+                val endPoint = "${destination.latitude},${destination.longitude}"
+                val url = "https://api.openrouteservice.org/v2/directions/foot-walking" +
+                        "?api_key=5b3ce3597851110001cf6248b5a6f8b1a61c4d438e8fe37a263d11c4" +
+                        "&start=${startPoint.longitude},${startPoint.latitude}" +
+                        "&end=${destination.longitude},${destination.latitude}"
 
                 CoroutineScope(Dispatchers.IO).launch {
                         try {
@@ -88,6 +98,7 @@ class QuestDetailsFragment : Fragment() {
 
                                 if (response.isSuccessful) {
                                         val responseBody = response.body?.string()
+                                        Log.d("QuestDetailsFragment", "Response from routing service: $responseBody")
                                         if (responseBody != null) {
                                                 val routePoints = parseRoute(responseBody)
                                                 withContext(Dispatchers.Main) {
@@ -95,7 +106,7 @@ class QuestDetailsFragment : Fragment() {
                                                 }
                                         }
                                 } else {
-                                        // Обработка ошибки
+                                        Log.e("QuestDetailsFragment", "Request to routing service API failed: ${response.code}")
                                 }
                         } catch (e: Exception) {
                                 // Обработка исключения
@@ -105,9 +116,19 @@ class QuestDetailsFragment : Fragment() {
 
         private fun parseRoute(responseBody: String): List<GeoPoint> {
                 val json = JSONObject(responseBody)
-                // Здесь должен быть ваш код для разбора JSON и создания списка GeoPoint
-                // ...
-                return emptyList() // Верните список точек маршрута
+                val routes = json.getJSONArray("routes")
+                val route = routes.getJSONObject(0)
+                val geometry = route.getJSONObject("geometry")
+                val coordinates = geometry.getJSONArray("coordinates")
+
+                val routePoints = mutableListOf<GeoPoint>()
+                for (i in 0 until coordinates.length()) {
+                        val coord = coordinates.getJSONArray(i)
+                        val lon = coord.getDouble(0)
+                        val lat = coord.getDouble(1)
+                        routePoints.add(GeoPoint(lat, lon))
+                }
+                return routePoints
         }
 
         private fun drawRouteOnMap(routePoints: List<GeoPoint>) {
@@ -117,6 +138,13 @@ class QuestDetailsFragment : Fragment() {
                 }
                 map.overlays.add(polyline)
                 map.invalidate()
+        }
+
+        private fun addMarkerAtLocation(geoPoint: GeoPoint) {
+                val marker = Marker(map)
+                marker.position = geoPoint
+                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                map.overlays.add(marker)
         }
 
         override fun onDestroyView() {
