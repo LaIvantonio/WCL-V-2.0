@@ -31,7 +31,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
             "theme_preference" -> {
-                val selectedTheme = sharedPreferences?.getString(key, "light") ?: "light"
+                val selectedTheme = sharedPreferences?.getString(key, "system") ?: "system"
                 updateThemePreferenceSummary(findPreferenceByKey(key) as ListPreference)
                 updateAppTheme(selectedTheme)
                 saveThemePreference(selectedTheme)
@@ -43,7 +43,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
 
     private fun getSavedTheme(): String {
         return PreferenceManager.getDefaultSharedPreferences(requireContext())
-            .getString("theme_preference", "light") ?: "light"
+            .getString("theme_preference", "system") ?: "system"
     }
 
     private fun saveThemePreference(theme: String) {
@@ -57,6 +57,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         when (themeValue) {
             "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             "dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            "system" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         }
         fragmentManager?.beginTransaction()?.detach(this)?.attach(this)?.commit()
     }

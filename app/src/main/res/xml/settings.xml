@@ -8,7 +8,7 @@
             android:key="theme_preference"
             android:title="App Theme"
             android:summary="Choose your preferred app theme"
-            android:defaultValue="light"
+            android:defaultValue="system"
             android:entries="@array/theme_options"
             android:entryValues="@array/theme_values" />
 
