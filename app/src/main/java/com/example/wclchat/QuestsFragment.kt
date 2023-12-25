@@ -25,10 +25,16 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationResult
+import android.os.Looper
+
 
 class QuestsFragment : Fragment() {
     private var _binding: FragmentQuestsBinding? = null
     private val binding get() = _binding!!
+    private val allQuests = mutableListOf<Quest>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,36 +57,79 @@ class QuestsFragment : Fragment() {
         checkLocationPermission()
     }
 
-
-    private fun requestPlaces(location: Location) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val client = OkHttpClient()
-                val url = "https://nominatim.openstreetmap.org/search?format=json&limit=5&q=park&bounded=1&viewbox=${location.longitude - 0.01},${location.latitude + 0.01},${location.longitude + 0.01},${location.latitude - 0.01}"
-                val request = Request.Builder().url(url).build()
-                val response = client.newCall(request).execute()
-
-                val responseBody = response.body?.string()
-
-                Log.d("QuestsFragment", "Response: $responseBody")
-                if (response.isSuccessful && responseBody != null) {
-                    val placesType = object : TypeToken<List<Place>>() {}.type
-                    val places: List<Place> = Gson().fromJson(responseBody, placesType)
-
-                    withContext(Dispatchers.Main) {
-                        // Обрабатываем полученные данные и обновляем UI
-                        generateQuestsBasedOnPlaces(places)
+    private fun loadUserPreferencesAndRequestPlaces() {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId != null) {
+            val databaseReference = Firebase.database.getReference("usersPreferences")
+            databaseReference.child(userId).addListenerForSingleValueEvent(object :
+                ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val preferences = snapshot.getValue(Preferences::class.java)
+                    if (preferences != null) {
+                        Log.d("QuestsFragment", "User preferences loaded: $preferences")
+                        getLocation { location ->
+                            requestPlaces(location, preferences)
+                        }
+                    } else {
+                        Log.d("QuestsFragment", "User preferences are null")
                     }
-                } else {
-                    // Обработка ошибок запроса
                 }
-            } catch (e: Exception) {
-                Log.e("QuestsFragment", "Error requesting places", e)
-                // Обработка ошибок запроса
-            }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.d("QuestsFragment", "Database error: ${error.message}")
+                }
+            })
+        } else {
+            Log.d("QuestsFragment", "User ID is null")
         }
     }
 
+    private fun requestPlaces(location: Location, preferences: Preferences) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val types = mutableListOf<String>()
+                if (preferences.monuments) types.add("monument")
+                if (preferences.museums) types.add("museum")
+                if (preferences.parks) types.add("park")
+                if (preferences.theaters) types.add("theatre")
+
+                val allQuests = mutableListOf<Quest>()
+                val client = OkHttpClient()
+
+                // Очистите список квестов перед новыми запросами
+                allQuests.clear()
+
+                // Последовательно выполняйте запросы к API для каждого типа места
+                types.forEach { type ->
+                    val url = "https://nominatim.openstreetmap.org/search?format=json&limit=5&q=$type&bounded=1&viewbox=${location.longitude - 0.01},${location.latitude + 0.01},${location.longitude + 0.01},${location.latitude - 0.01}"
+                    Log.d("QuestsFragment", "Requesting places for type: $type with URL: $url")
+                    val request = Request.Builder().url(url).build()
+                    val response = client.newCall(request).execute()
+
+                    val responseBody = response.body?.string()
+                    Log.d("QuestsFragment", "Response for type $type: $responseBody")
+
+                    if (response.isSuccessful && responseBody != null) {
+                        val placesType = object : TypeToken<List<Place>>() {}.type
+                        val places: List<Place> = Gson().fromJson(responseBody, placesType)
+
+                        // Генерируем квесты на основе полученных мест и добавляем их в общий список
+                        val quests = generateQuestsBasedOnPlaces(places)
+                        allQuests.addAll(quests)
+                    } else {
+                        Log.d("QuestsFragment", "Request for type $type failed: ${response.code}")
+                    }
+                }
+
+                // Переключитесь на основной поток для обновления UI
+                withContext(Dispatchers.Main) {
+                    updateQuestsRecyclerView(allQuests)
+                }
+            } catch (e: Exception) {
+                Log.e("QuestsFragment", "Error requesting places", e)
+            }
+        }
+    }
     // Класс для представления места, полученного от Nominatim API
     data class Place(
         val lat: Double,
@@ -99,7 +148,10 @@ class QuestsFragment : Fragment() {
                     val preferences = snapshot.getValue(Preferences::class.java)
                     if (preferences != null) {
                         Log.d("QuestsFragment", "User preferences loaded: $preferences")
-                        generateQuestsBasedOnPreferences(preferences)
+                        // Теперь вызываем requestPlaces с текущим местоположением пользователя и его предпочтениями
+                        getLocation { location ->
+                            requestPlaces(location, preferences)
+                        }
                     } else {
                         Log.d("QuestsFragment", "User preferences are null")
                     }
@@ -114,30 +166,10 @@ class QuestsFragment : Fragment() {
         }
     }
 
-    private fun generateQuestsBasedOnPreferences(preferences: Preferences) {
-        val quests = mutableListOf<Quest>()
-        // Примерная логика генерации квестов
-        if (preferences.monuments) {
-            quests.add(Quest(id = "1", title = "Посетить памятник 'Мать Родина'", description = "Описание квеста...", location = "47.222078,39.720349"))
-        }
-        if (preferences.museums) {
-            quests.add(Quest(id = "2", title = "Посетить Ростовский музей изобразительных искусств", description = "Описание квеста...", location = "47.231349,39.723097"))
-        }
-        if (preferences.parks) {
-            quests.add(Quest(id = "3", title = "Прогулка в парке Горького", description = "Описание квеста...", location = "47.222831,39.716775"))
-        }
-        if (preferences.theaters) {
-            quests.add(Quest(id = "4", title = "Посетить Ростовский академический театр драмы", description = "Описание квеста...", location = "47.234383,39.712020"))
-        }
-        // Добавьте больше квестов в зависимости от предпочтений пользователя
-
-        Log.d("QuestsFragment", "Generated quests based on preferences: $quests")
-        updateQuestsRecyclerView(quests)
-    }
 
     // Функция для генерации квестов на основе найденных мест
-    private fun generateQuestsBasedOnPlaces(places: List<Place>) {
-        val quests = places.mapIndexed { index, place ->
+    private fun generateQuestsBasedOnPlaces(places: List<Place>): List<Quest> {
+        return places.mapIndexed { index, place ->
             Quest(
                 id = "quest_${index + 1}",
                 title = "Квест: ${place.display_name}",
@@ -145,8 +177,6 @@ class QuestsFragment : Fragment() {
                 location = "${place.lat},${place.lon}"
             )
         }
-        Log.d("QuestsFragment", "Generated quests based on places: $quests")
-        updateQuestsRecyclerView(quests)
     }
 
         private fun updateQuestsRecyclerView(quests: List<Quest>) {
@@ -177,9 +207,10 @@ class QuestsFragment : Fragment() {
                 LOCATION_PERMISSION_REQUEST_CODE
             )
         } else {
-            getLocation()
+            loadUserPreferencesAndRequestPlaces()
         }
     }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -188,7 +219,7 @@ class QuestsFragment : Fragment() {
         when (requestCode) {
             LOCATION_PERMISSION_REQUEST_CODE -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    getLocation()
+                    loadUserPreferencesAndRequestPlaces()
                 } else {
                     // Разрешение не получено, нужно обработать этот случай
                 }
@@ -199,20 +230,37 @@ class QuestsFragment : Fragment() {
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
     }
-    private fun getLocation() {
+    private fun getLocation(callback: (Location) -> Unit) {
         val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         if (ActivityCompat.checkSelfPermission(
                 requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            fusedLocationProviderClient.lastLocation.addOnSuccessListener { location: Location? ->
-                location?.let {
-                    // У вас есть местоположение пользователя, можно использовать его для запроса квестов
-                    requestPlaces(it)
+            val locationRequest = LocationRequest.create().apply {
+                priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+                interval = 10000
+                fastestInterval = 5000
+            }
+            val locationCallback = object : LocationCallback() {
+                override fun onLocationResult(locationResult: LocationResult) {
+                    locationResult ?: return
+                    for (location in locationResult.locations) {
+                        // Убедитесь, что останавливаете обновления местоположения после получения первого обновления
+                        fusedLocationProviderClient.removeLocationUpdates(this)
+                        callback(location)
+                        break // Выходим из цикла после обработки первого местоположения
+                    }
                 }
             }
+            fusedLocationProviderClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.getMainLooper()
+            )
         }
     }
 
 }
+
+
