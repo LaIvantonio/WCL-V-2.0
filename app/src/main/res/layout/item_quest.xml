@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="16dp">
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/border_background"> <!-- Установка фона -->
 
     <TextView
         android:id="@+id/tvQuestTitle"
@@ -11,6 +11,6 @@
         android:layout_height="wrap_content"
         android:text="Название квеста" />
 
-    <!-- Добавьте другие элементы представления, если они вам нужны -->
+    <!-- Другие элементы разметки здесь, например, другие TextView, Button и т.д. -->
 
 </LinearLayout>

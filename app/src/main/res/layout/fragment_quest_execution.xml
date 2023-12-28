@@ -6,24 +6,36 @@
     android:layout_height="match_parent"
     tools:context=".QuestExecutionFragment">
 
-    <!-- Здесь будет карта -->
-    <FrameLayout
-        android:id="@+id/mapExecutionContainer"
+    <!-- Карта для отображения во время выполнения квеста -->
+    <org.osmdroid.views.MapView
+        android:id="@+id/map"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/btnCompleteQuest"
+        app:layout_constraintBottom_toTopOf="@id/btnCompleteQuest"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
     <Button
+        android:id="@+id/btnCancelQuest"
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        android:text="Отменить квест"
+        app:backgroundTint="#BD0B52"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnCompleteQuest"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
         android:id="@+id/btnCompleteQuest"
-        android:layout_width="wrap_content"
+        android:layout_width="180dp"
         android:layout_height="wrap_content"
         android:text="Я на месте"
+        app:backgroundTint="#5DC862"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="16dp"/>
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@id/btnCancelQuest" />/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

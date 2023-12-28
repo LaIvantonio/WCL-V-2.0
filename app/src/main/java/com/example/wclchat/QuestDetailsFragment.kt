@@ -60,6 +60,22 @@ class QuestDetailsFragment : Fragment() {
                                 initializeMap(it.location, currentLocation)
                         }
                 }
+
+                binding.btnReturnToQuests.setOnClickListener {
+                        // Возвращаемся к фрагменту квестов
+                        requireActivity().supportFragmentManager.popBackStack()
+                }
+
+                binding.btnStartQuest.setOnClickListener {
+                        // Переходим к фрагменту выполнения квеста
+                        if (quest != null && currentLocation != null) {
+                                val fragment = QuestExecutionFragment.newInstance(quest, currentLocation)
+                                requireActivity().supportFragmentManager.beginTransaction()
+                                        .replace(R.id.placeHolder, fragment)
+                                        .addToBackStack(null)
+                                        .commit()
+                        }
+                }
         }
 
         private fun initializeMap(questLocationString: String, currentLocation: Location) {
