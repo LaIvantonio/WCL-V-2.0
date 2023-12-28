@@ -38,7 +38,7 @@ class QuestExecutionFragment : Fragment() {
     private var currentRoute: Polyline? = null
     // Добавляем переменную для хранения последнего известного местоположения пользователя
     private var lastKnownLocation: GeoPoint? = null
-    private val routeThreshold = 50 // Расстояние в метрах, при превышении которого будет запрошен новый маршрут
+    private val routeThreshold = 20 // Расстояние в метрах, при превышении которого будет запрошен новый маршрут
 
     companion object {
         private const val ARG_QUEST = "quest"
@@ -145,6 +145,12 @@ class QuestExecutionFragment : Fragment() {
                     val questLocation = questLocationString.split(",").let { loc ->
                         GeoPoint(loc[0].toDouble(), loc[1].toDouble())
                     }
+                    // Удаляем старый маршрут с карты
+                    currentRoute?.let { route ->
+                        map.overlays.remove(route)
+                        map.invalidate()
+                    }
+                    // Запрашиваем новый маршрут
                     requestRoute(questLocation, userGeoPoint)
                 }
             }
@@ -154,27 +160,8 @@ class QuestExecutionFragment : Fragment() {
         // Обновляем местоположение маркера пользователя на карте
         userLocationMarker.position = userGeoPoint
         map.invalidate() // Обновляем карту, чтобы показать новое местоположение пользователя
-
-        // Опционально: запрос нового маршрута, если пользователь сильно отклонился от курса
-        if (shouldRequestNewRoute(userGeoPoint)) {
-            quest?.location?.let { questLocationString ->
-                val questLocation = questLocationString.split(",").let {
-                    GeoPoint(it[0].toDouble(), it[1].toDouble())
-                }
-                requestRoute(questLocation, userGeoPoint)
-            }
-        }
     }
 
-    private fun shouldRequestNewRoute(userGeoPoint: GeoPoint): Boolean {
-        // Удаляем старый маршрут с карты
-        currentRoute?.let {
-            map.overlays.remove(it)
-            currentRoute = null
-        }
-        map.invalidate()
-        return false // Пример: всегда возвращает false, замените на вашу логику
-    }
         private fun requestRoute(destination: GeoPoint, startPoint: GeoPoint) {
         val endPoint = "${destination.latitude},${destination.longitude}"
         val url = "https://api.openrouteservice.org/v2/directions/foot-walking" +
@@ -231,9 +218,12 @@ class QuestExecutionFragment : Fragment() {
             setPoints(routePoints)
             color = Color.BLUE
         }
+        // Сохраняем текущий маршрут
+        currentRoute = polyline
         map.overlays.add(polyline)
         map.invalidate()
     }
+
 
     private fun addMarkerAtLocation(geoPoint: GeoPoint) {
         val marker = Marker(map)
